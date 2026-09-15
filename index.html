@@ -89,7 +89,7 @@
             background-color: #6c7a7d;
         }
 
-        /* 카드 그리드 레이아웃 (6열 x 6행 = 36개, 가로 폭 넓힘) */
+        /* 카드 그리드 레이아웃 (6열 x 6행 = 36개) */
         .card-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -146,7 +146,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 8px 6px;
+            padding: 10px;
             user-select: none;
         }
 
@@ -170,46 +170,23 @@
             font-weight: 600;
         }
 
-        /* 앞면 (단어 공개 상태) */
+        /* 앞면 (단어 전용 공개 상태) */
         .card-front {
             background-color: #ffffff;
             color: #2c3e50;
             transform: rotateY(180deg);
             border: 3px solid #a29bfe;
-            justify-content: space-evenly;
+            justify-content: center; /* 단어 텍스트 수직 중앙 정렬 */
         }
 
-        /* 종류별 배지 스타일 */
-        .type-badge {
-            font-size: 0.85rem;
-            padding: 3px 10px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-주어 { 
-            background-color: #2980b9; 
-            border: 1px solid #1f618d;
-        }
-        .badge-목적어 { 
-            background-color: #27ae60; 
-            border: 1px solid #1e8449;
-        }
-        .badge-서술어 { 
-            background-color: #d35400; 
-            border: 1px solid #a04000;
-        }
-
-        /* 단어 텍스트 크기 */
+        /* 단어 텍스트 크기 강조 */
         .word-text {
-            font-size: 1.55rem;
+            font-size: 1.7rem;
             font-weight: 900;
             word-break: keep-all;
             color: #1a252f;
             line-height: 1.2;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+            text-align: center;
         }
 
         /* 반응형 폰트 조절 */
@@ -218,7 +195,7 @@
                 height: 115px;
             }
             .word-text {
-                font-size: 1.35rem;
+                font-size: 1.45rem;
             }
         }
 
@@ -227,7 +204,7 @@
                 height: 105px;
             }
             .word-text {
-                font-size: 1.2rem;
+                font-size: 1.25rem;
             }
         }
     </style>
@@ -235,7 +212,7 @@
 <body>
 
     <h1>🧩 문장 만들기 카드 뒤집기</h1>
-    <p class="instruction">모든 카드를 연 후, 문장을 만들 때 사용한 카드를 눌러 뒷면으로 뒤집어 보세요!</p>
+    <p class="instruction">모든 카드를 연 후, 단어를 조합하여 문장을 만들어 보세요!</p>
 
     <!-- 상단 컨트롤 버튼 -->
     <div class="control-panel">
@@ -247,49 +224,14 @@
     <div class="card-grid" id="cardGrid"></div>
 
     <script>
-        // 1. 카드의 데이터 (주어 12, 목적어 12, 서술어 12 = 총 36개)
-        const originalCards = [
-            // 주어 12개
-            { type: '주어', text: '내가' },
-            { type: '주어', text: '민수가' },
-            { type: '주어', text: '강아지가' },
-            { type: '주어', text: '선생님이' },
-            { type: '주어', text: '고양이가' },
-            { type: '주어', text: '친구들이' },
-            { type: '주어', text: '동생이' },
-            { type: '주어', text: '우리가' },
-            { type: '주어', text: '로봇이' },
-            { type: '주어', text: '새가' },
-            { type: '주어', text: '하늘이' },
-            { type: '주어', text: '해가' },
-
-            // 목적어 12개
-            { type: '목적어', text: '사과를' },
-            { type: '목적어', text: '축구공을' },
-            { type: '목적어', text: '책을' },
-            { type: '목적어', text: '밥을' },
-            { type: '목적어', text: '노래를' },
-            { type: '목적어', text: '자전거를' },
-            { type: '목적어', text: '그림을' },
-            { type: '목적어', text: '장난감을' },
-            { type: '목적어', text: '우유를' },
-            { type: '목적어', text: '영화를' },
-            { type: '목적어', text: '옷을' },
-            { type: '목적어', text: '선물을' },
-
-            // 서술어 12개 (타동사 + 자동사/형용사)
-            { type: '서술어', text: '먹는다.' },
-            { type: '서술어', text: '찬다.' },
-            { type: '서술어', text: '읽는다.' },
-            { type: '서술어', text: '마신다.' },
-            { type: '서술어', text: '부른다.' },
-            { type: '서술어', text: '탄다.' },
-            { type: '서술어', text: '그린다.' },
-            { type: '서술어', text: '만든다.' },
-            { type: '서술어', text: '본다.' },
-            { type: '서술어', text: '입는다.' },
-            { type: '서술어', text: '떠오른다.' },
-            { type: '서술어', text: '맑다.' }
+        // 1. 단어 데이터 (총 36개 단어만 구성)
+        const wordList = [
+            '내가', '민수가', '강아지가', '선생님이', '고양이가', '친구들이', 
+            '동생이', '우리가', '로봇이', '새가', '하늘이', '해가',
+            '사과를', '축구공을', '책을', '밥을', '노래를', '자전거를', 
+            '그림을', '장난감을', '우유를', '영화를', '옷을', '선물을',
+            '먹는다.', '찬다.', '읽는다.', '마신다.', '부른다.', '탄다.', 
+            '그린다.', '만든다.', '본다.', '입는다.', '떠오른다.', '맑다.'
         ];
 
         // 2. 카드 무작위 섞기
@@ -302,14 +244,14 @@
             return shuffled;
         }
 
-        // 3. 카드 화면 생성
+        // 3. 카드 화면 생성 (성분 표시 없이 단어만 출력)
         function createBoard() {
             const grid = document.getElementById('cardGrid');
             grid.innerHTML = '';
             
-            const shuffledCards = shuffle(originalCards);
+            const shuffledWords = shuffle(wordList);
 
-            shuffledCards.forEach((data, index) => {
+            shuffledWords.forEach((wordText, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 
@@ -324,8 +266,7 @@
                             <span class="card-num">${index + 1}</span>
                         </div>
                         <div class="card-front">
-                            <span class="type-badge badge-${data.type}">${data.type}</span>
-                            <span class="word-text">${data.text}</span>
+                            <span class="word-text">${wordText}</span>
                         </div>
                     </div>
                 `;
