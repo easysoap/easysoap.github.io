@@ -89,18 +89,18 @@
             background-color: #6c7a7d;
         }
 
-        /* 카드 그리드 레이아웃 (6열 x 5행) */
+        /* 카드 그리드 레이아웃 (6열 x 6행 = 36개, 가로 폭 넓힘) */
         .card-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 14px;
             width: 100%;
-            max-width: 1080px;
+            max-width: 1200px;
         }
 
-        @media (max-width: 860px) {
+        @media (max-width: 900px) {
             .card-grid {
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(4, 1fr);
                 gap: 10px;
             }
         }
@@ -114,7 +114,7 @@
 
         /* 3D 카드 뒤집기 효과 */
         .card {
-            height: 130px;
+            height: 125px;
             perspective: 1000px;
             cursor: pointer;
         }
@@ -202,7 +202,7 @@
             border: 1px solid #a04000;
         }
 
-        /* 단어 텍스트 크기 가득 차게 크게 확대 */
+        /* 단어 텍스트 크기 */
         .word-text {
             font-size: 1.55rem;
             font-weight: 900;
@@ -213,22 +213,18 @@
         }
 
         /* 반응형 폰트 조절 */
-        @media (max-width: 860px) {
+        @media (max-width: 900px) {
             .card {
-                height: 120px;
+                height: 115px;
             }
             .word-text {
                 font-size: 1.35rem;
             }
-            .type-badge {
-                font-size: 0.8rem;
-                padding: 2px 8px;
-            }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .card {
-                height: 110px;
+                height: 105px;
             }
             .word-text {
                 font-size: 1.2rem;
@@ -247,13 +243,13 @@
         <button class="btn btn-reset" onclick="resetGame()">🔄 카드 섞기 / 초기화</button>
     </div>
 
-    <!-- 카드 30개 그리드 -->
+    <!-- 카드 36개 그리드 -->
     <div class="card-grid" id="cardGrid"></div>
 
     <script>
-        // 1. 카드의 데이터 (주어 10, 목적어 10, 서술어 10)
+        // 1. 카드의 데이터 (주어 12, 목적어 12, 서술어 12 = 총 36개)
         const originalCards = [
-            // 주어 10개
+            // 주어 12개
             { type: '주어', text: '내가' },
             { type: '주어', text: '민수가' },
             { type: '주어', text: '강아지가' },
@@ -264,8 +260,10 @@
             { type: '주어', text: '우리가' },
             { type: '주어', text: '로봇이' },
             { type: '주어', text: '새가' },
+            { type: '주어', text: '하늘이' },
+            { type: '주어', text: '해가' },
 
-            // 목적어 10개
+            // 목적어 12개
             { type: '목적어', text: '사과를' },
             { type: '목적어', text: '축구공을' },
             { type: '목적어', text: '책을' },
@@ -276,8 +274,10 @@
             { type: '목적어', text: '장난감을' },
             { type: '목적어', text: '우유를' },
             { type: '목적어', text: '영화를' },
+            { type: '목적어', text: '옷을' },
+            { type: '목적어', text: '선물을' },
 
-            // 서술어 10개
+            // 서술어 12개 (타동사 + 자동사/형용사)
             { type: '서술어', text: '먹는다.' },
             { type: '서술어', text: '찬다.' },
             { type: '서술어', text: '읽는다.' },
@@ -287,10 +287,12 @@
             { type: '서술어', text: '그린다.' },
             { type: '서술어', text: '만든다.' },
             { type: '서술어', text: '본다.' },
-            { type: '서술어', text: '날아간다.' }
+            { type: '서술어', text: '입는다.' },
+            { type: '서술어', text: '떠오른다.' },
+            { type: '서술어', text: '맑다.' }
         ];
 
-        // 2. 카드 무작위 섞기 (Fisher-Yates Shuffle)
+        // 2. 카드 무작위 섞기
         function shuffle(array) {
             const shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -311,7 +313,6 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 
-                // 클릭할 때마다 앞/뒷면 상태 토글
                 card.onclick = function() {
                     this.classList.toggle('flipped');
                 };
@@ -338,7 +339,7 @@
             cards.forEach(card => card.classList.add('flipped'));
         }
 
-        // 5. 카드 섞기 및 초기화 (다시 모두 뒷면으로)
+        // 5. 카드 섞기 및 초기화
         function resetGame() {
             createBoard();
         }
