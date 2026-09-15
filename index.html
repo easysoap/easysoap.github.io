@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문장 만들기 카드 뒤집기 게임</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        }
+
+        body {
+            background-color: #f0f3f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 2rem;
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .instruction {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* 컨트롤 버튼 영역 */
+        .control-panel {
+            background: #ffffff;
+            padding: 16px 28px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background-color: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-show-all {
+            background-color: #27ae60;
+        }
+
+        .btn-show-all:hover {
+            background-color: #219150;
+        }
+
+        .btn-reset {
+            background-color: #7f8c8d;
+        }
+
+        .btn-reset:hover {
+            background-color: #6c7a7d;
+        }
+
+        /* 카드 그리드 레이아웃 (6열 x 5행) */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 14px;
+            width: 100%;
+            max-width: 1080px;
+        }
+
+        @media (max-width: 860px) {
+            .card-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .card-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+        }
+
+        /* 3D 카드 뒤집기 효과 */
+        .card {
+            height: 130px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            border-radius: 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        /* 카드 뒤집힘 상태 (앞면 보기) */
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 6px;
+            user-select: none;
+        }
+
+        /* 뒷면 (숨김/사용완료 상태) */
+        .card-back {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: 2px solid #5f3dc4;
+        }
+
+        .card-back .card-icon {
+            font-size: 2rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .card-back .card-num {
+            font-size: 0.85rem;
+            margin-top: 6px;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        /* 앞면 (단어 공개 상태) */
+        .card-front {
+            background-color: #ffffff;
+            color: #2c3e50;
+            transform: rotateY(180deg);
+            border: 3px solid #a29bfe;
+            justify-content: space-evenly;
+        }
+
+        /* 종류별 배지 스타일 */
+        .type-badge {
+            font-size: 0.85rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-주어 { 
+            background-color: #2980b9; 
+            border: 1px solid #1f618d;
+        }
+        .badge-목적어 { 
+            background-color: #27ae60; 
+            border: 1px solid #1e8449;
+        }
+        .badge-서술어 { 
+            background-color: #d35400; 
+            border: 1px solid #a04000;
+        }
+
+        /* 단어 텍스트 크기 가득 차게 크게 확대 */
+        .word-text {
+            font-size: 1.55rem;
+            font-weight: 900;
+            word-break: keep-all;
+            color: #1a252f;
+            line-height: 1.2;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+        }
+
+        /* 반응형 폰트 조절 */
+        @media (max-width: 860px) {
+            .card {
+                height: 120px;
+            }
+            .word-text {
+                font-size: 1.35rem;
+            }
+            .type-badge {
+                font-size: 0.8rem;
+                padding: 2px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                height: 110px;
+            }
+            .word-text {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🧩 문장 만들기 카드 뒤집기</h1>
+    <p class="instruction">모든 카드를 연 후, 문장을 만들 때 사용한 카드를 눌러 뒷면으로 뒤집어 보세요!</p>
+
+    <!-- 상단 컨트롤 버튼 -->
+    <div class="control-panel">
+        <button class="btn btn-show-all" onclick="showAllCards()">📢 전체 카드 열기 (앞면)</button>
+        <button class="btn btn-reset" onclick="resetGame()">🔄 카드 섞기 / 초기화</button>
+    </div>
+
+    <!-- 카드 30개 그리드 -->
+    <div class="card-grid" id="cardGrid"></div>
+
+    <script>
+        // 1. 카드의 데이터 (주어 10, 목적어 10, 서술어 10)
+        const originalCards = [
+            // 주어 10개
+            { type: '주어', text: '내가' },
+            { type: '주어', text: '민수가' },
+            { type: '주어', text: '강아지가' },
+            { type: '주어', text: '선생님이' },
+            { type: '주어', text: '고양이가' },
+            { type: '주어', text: '친구들이' },
+            { type: '주어', text: '동생이' },
+            { type: '주어', text: '우리가' },
+            { type: '주어', text: '로봇이' },
+            { type: '주어', text: '새가' },
+
+            // 목적어 10개
+            { type: '목적어', text: '사과를' },
+            { type: '목적어', text: '축구공을' },
+            { type: '목적어', text: '책을' },
+            { type: '목적어', text: '밥을' },
+            { type: '목적어', text: '노래를' },
+            { type: '목적어', text: '자전거를' },
+            { type: '목적어', text: '그림을' },
+            { type: '목적어', text: '장난감을' },
+            { type: '목적어', text: '우유를' },
+            { type: '목적어', text: '영화를' },
+
+            // 서술어 10개
+            { type: '서술어', text: '먹는다.' },
+            { type: '서술어', text: '찬다.' },
+            { type: '서술어', text: '읽는다.' },
+            { type: '서술어', text: '마신다.' },
+            { type: '서술어', text: '부른다.' },
+            { type: '서술어', text: '탄다.' },
+            { type: '서술어', text: '그린다.' },
+            { type: '서술어', text: '만든다.' },
+            { type: '서술어', text: '본다.' },
+            { type: '서술어', text: '날아간다.' }
+        ];
+
+        // 2. 카드 무작위 섞기 (Fisher-Yates Shuffle)
+        function shuffle(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // 3. 카드 화면 생성
+        function createBoard() {
+            const grid = document.getElementById('cardGrid');
+            grid.innerHTML = '';
+            
+            const shuffledCards = shuffle(originalCards);
+
+            shuffledCards.forEach((data, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // 클릭할 때마다 앞/뒷면 상태 토글
+                card.onclick = function() {
+                    this.classList.toggle('flipped');
+                };
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-back">
+                            <span class="card-icon">❓</span>
+                            <span class="card-num">${index + 1}</span>
+                        </div>
+                        <div class="card-front">
+                            <span class="type-badge badge-${data.type}">${data.type}</span>
+                            <span class="word-text">${data.text}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 4. 모든 카드 한번에 앞면으로 열기
+        function showAllCards() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => card.classList.add('flipped'));
+        }
+
+        // 5. 카드 섞기 및 초기화 (다시 모두 뒷면으로)
+        function resetGame() {
+            createBoard();
+        }
+
+        // 페이지 최초 진입 시 보드 생성
+        createBoard();
+    </script>
+</body>
+</html>
